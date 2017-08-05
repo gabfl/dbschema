@@ -13,6 +13,8 @@ import psycopg2
 # Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--config", type=str, help="Config file location (default: ~/.dbschema.yml)")
+parser.add_argument("-t", "--tag", type=str, help="Database tag")
+parser.add_argument("-r", "--rollback", type=str, help="Rollback a migration")
 args = parser.parse_args()
 
 
@@ -76,6 +78,21 @@ def getMigrationSource(file):
         return f.read()
 
 
+def getConnection(engine, host, user, port, password, database):
+    """
+        Returns a PostgreSQL or MySQL connection
+    """
+
+    if engine == 'mysql':
+        # Connection
+        return getMysqlConnection(host, user, port, password, database)
+    elif engine == 'postgresql':
+        # Connection
+        return getPgConnection(host, user, port, password, database)
+    else:
+        raise RuntimeError('`%s` is not a valid engine.' % engine)
+
+
 def getMysqlConnection(host, user, port, password, database):
     """
         MySQL connection
@@ -129,6 +146,20 @@ def saveMigration(connection, basename):
         connection.commit()
 
 
+def deleteMigration(connection, basename):
+    """
+        Delete a migration in `migrations_applied` table
+    """
+
+    # Prepare query
+    sql = "DELETE FROM migrations_applied WHERE name = %s"
+
+    # Run
+    with connection.cursor() as cursor:
+        cursor.execute(sql, (basename,))
+        connection.commit()
+
+
 def isApplied(migrationsApplied, migrationName):
     """
         Check if a migration we want to run is already in the list of applied migrations
@@ -160,10 +191,9 @@ def getMigrationsApplied(engine, connection):
         raise RuntimeError('The table `migrations_applied` is missing. Please refer to the project documentation at https://github.com/gabfl/dbschema.')
 
 
-def loopThruMigrations(engine, path, connection):
+def applyMigrations(engine, connection, path):
     """
-        Get the list of migrations already applied
-        then loop thru migrations found in `path` and apply them
+        Apply all migrations in a chronological order
     """
 
     # Get migrations applied
@@ -190,36 +220,45 @@ def loopThruMigrations(engine, path, connection):
         saveMigration(connection, basename)
 
         # Log
-        print('   -> Migration ' + basename + ' applied')
-
-
-def applyMigrations(engine, host, user, port, password, db, path, preMigration, postMigration):
-    """
-        Connect to the database and apply all migrations in a chronological order
-    """
-
-    if engine == 'mysql':
-        # Connection
-        connection = getMysqlConnection(host, user, port, password, db)
-    elif engine == 'postgresql':
-        # Connection
-        connection = getPgConnection(host, user, port, password, db)
-    else:
-        raise RuntimeError('`%s` is not a valid engine.' % engine)
-
-    # Run pre migration queries
-    if preMigration:
-        runMigration(connection, preMigration)
-
-    # Find an apply migrations recursively
-    loopThruMigrations(engine, path, connection)
-
-    # Run post migration queries
-    if postMigration:
-        runMigration(connection, postMigration)
+        print('   -> Migration `%s` applied' % (basename))
 
     # Log
     print(' * Migrations applied')
+
+
+def rollbackMigration(engine, connection, path, migrationToRollback):
+    """
+        Rollback a migration
+    """
+
+    # Get migrations applied
+    migrationsApplied = getMigrationsApplied(engine, connection)
+
+    # Ensure that the migration was previously applied
+    if not isApplied(migrationsApplied, migrationToRollback):
+        raise RuntimeError('`%s` is not in the list of previously applied migrations.' % (migrationToRollback))
+
+    # Rollback file
+    file = path + migrationToRollback + '/down.sql'
+
+    # Ensure that the file exists
+    checExists(file)
+
+    # Set vars
+    basename = os.path.basename(os.path.dirname(file))
+
+    # Get migration source
+    source = getMigrationSource(file)
+    # print (source);
+
+    # Run migration rollback
+    runMigration(connection, source)
+
+    # Delete migration
+    deleteMigration(connection, basename)
+
+    # Log
+    print('   -> Migration `%s` has been rolled back' % (basename))
 
 
 def main():
@@ -227,7 +266,15 @@ def main():
     config = getConfig()
     databases = config['databases']
 
+    # If we are rolling back, ensure that we have a database tag
+    if args.rollback and not args.tag:
+        raise RuntimeError('To rollback a migration you need to specify the database tag with `--tag`')
+
     for database in databases:
+        # If a tag is specified, skip other tags
+        if args.tag and args.tag != database:
+            continue
+
         # Set vars
         engine = databases[database].get('engine', 'mysql')
         host = databases[database].get('127.0.0.1', 'localhost')
@@ -242,9 +289,25 @@ def main():
         # Check if the migration path exists
         checExists(path, 'dir')
 
-        print(' * Applying migrations for ' + engine + ' -> ' + db)
+        # Get database connection
+        connection = getConnection(engine, host, user, port, password, db)
 
-        applyMigrations(engine, host, user, port, password, db, path, preMigration, postMigration)
+        # Run pre migration queries
+        if preMigration:
+            runMigration(connection, preMigration)
+
+        if args.rollback:
+            print(' * Rolling back %s -> `%s`' % (engine, db))
+
+            rollbackMigration(engine, connection, path, args.rollback)
+        else:
+            print(' * Applying migrations for %s -> `%s`' % (engine, db))
+
+            applyMigrations(engine, connection, path)
+
+        # Run post migration queries
+        if postMigration:
+            runMigration(connection, postMigration)
 
 
 if __name__ == "__main__":

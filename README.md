@@ -29,12 +29,13 @@ See the schema for [MySQL](schema/mysql.sql) or [PostgreSQL](schema/postgresql.s
 
 For each database, you need to have a migration path (setting `path` in the migration file).
 
-Within that path you need to create one folder per migration. This folder needs to contain a file called `up.sql` with the SQL queries.
+Within that path you need to create one folder per migration. This folder must contain a file called `up.sql` with the SQL queries and optionally a file called `down.sql` for rollbacks.
 
 ```
 /path/to/migrations/db1/
 |-- migration1/
 |   |-- up.sql
+|   |-- down.sql
 |-- migration2/
 |   |-- up.sql
 |...
@@ -43,14 +44,47 @@ Within that path you need to create one folder per migration. This folder needs 
 |   |-- up.sql
 |-- migration2/
 |   |-- up.sql
+|   |-- down.sql
 |...
 ```
 
 ## Usage
 
+### Apply pending migrations
+
 ```bash
 dbschema
 
-# or
+# or to specify a config file path
 dbschema --config /path/to/config.yml
+
+# or to migrate only a specific database
+dbschema --tag db1
+```
+
+### Rollback
+
+```bash
+dbschema --tag db1 --rollback migration1
+```
+
+## Example
+
+```bash
+$ dbschema
+  * Applying migrations for postgresql -> `test`
+    -> Migration `migration1` applied
+    -> Migration `migration2` applied
+    -> Migration `migration3` applied
+  * Migrations applied
+  * Applying migrations for mysql -> `test`
+    -> Migration `migration1` applied
+    -> Migration `migration2` applied
+    -> Migration `migration3` applied
+  * Migrations applied
+$
+$ dbschema --tag db2 --rollback migration1
+  * Rolling back mysql -> `migration1`
+    -> Migration `migration1` has been rolled back
+$
 ```
