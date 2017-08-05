@@ -1,5 +1,5 @@
 databases:
-    db1: # Unique reference
+    db1: # Unique tag
         engine: postgresql # Engine name (`postgresql` pr `mysql`)
         host: 127.0.0.1 # Database host
         port: 5432 # Database port

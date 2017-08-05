@@ -8,7 +8,7 @@ except(IOError, ImportError):
 
 setup(
     name='dbschema',
-    version='1.0.2',
+    version='1.1',
     description='Schema migration made easy',
     long_description=long_description,
     author='Gabriel Bordeaux',
