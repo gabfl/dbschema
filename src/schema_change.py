@@ -270,21 +270,21 @@ def main():
     if args.rollback and not args.tag:
         raise RuntimeError('To rollback a migration you need to specify the database tag with `--tag`')
 
-    for database in databases:
+    for tag in databases:
         # If a tag is specified, skip other tags
-        if args.tag and args.tag != database:
+        if args.tag and args.tag != tag:
             continue
 
         # Set vars
-        engine = databases[database].get('engine', 'mysql')
-        host = databases[database].get('127.0.0.1', 'localhost')
-        port = databases[database].get('port', 3306)
-        user = databases[database].get('user')
-        password = databases[database].get('password')
-        db = databases[database].get('db')
-        path = databases[database].get('path')
-        preMigration = databases[database].get('pre_migration')
-        postMigration = databases[database].get('post_migration')
+        engine = databases[tag].get('engine', 'mysql')
+        host = databases[tag].get('127.0.0.1', 'localhost')
+        port = databases[tag].get('port', 3306)
+        user = databases[tag].get('user')
+        password = databases[tag].get('password')
+        db = databases[tag].get('db')
+        path = databases[tag].get('path')
+        preMigration = databases[tag].get('pre_migration')
+        postMigration = databases[tag].get('post_migration')
 
         # Check if the migration path exists
         checExists(path, 'dir')
@@ -297,11 +297,11 @@ def main():
             runMigration(connection, preMigration)
 
         if args.rollback:
-            print(' * Rolling back %s -> `%s`' % (engine, db))
+            print(' * Rolling back %s (`%s` on %s)' % (tag, db, engine))
 
             rollbackMigration(engine, connection, path, args.rollback)
         else:
-            print(' * Applying migrations for %s -> `%s`' % (engine, db))
+            print(' * Applying migrations for %s (`%s` on %s)' % (tag, db, engine))
 
             applyMigrations(engine, connection, path)
 

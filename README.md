@@ -72,12 +72,12 @@ dbschema --tag db1 --rollback migration1
 
 ```bash
 $ dbschema
-  * Applying migrations for postgresql -> `test`
+  * Applying migrations for db1 (`test` on postgresql)
     -> Migration `migration1` applied
     -> Migration `migration2` applied
     -> Migration `migration3` applied
   * Migrations applied
-  * Applying migrations for mysql -> `test`
+  * Applying migrations for db2 (`test` on mysql)
     -> Migration `migration1` applied
     -> Migration `migration2` applied
     -> Migration `migration3` applied
