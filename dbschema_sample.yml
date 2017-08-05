@@ -1,0 +1,21 @@
+databases:
+    db1: # Unique reference
+        engine: postgresql # Engine name (`postgresql` pr `mysql`)
+        host: 127.0.0.1 # Database host
+        port: 5432 # Database port
+        user: gab # Username
+        password: azerty # Optional password
+        db: my_db # Database name
+        path: /path/to/migrations/ # Path to the migration folder
+        pre_migration: '' # Optional queries ran before migrating
+        post_migration: 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO gab; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO gab' # Optional queries ran after migrating
+    db2:
+        engine: mysql
+        host: 127.0.0.1
+        port: 3306
+        user: gab
+        password: azerty
+        db: my_db
+        path: /path/to/migrations/
+        pre_migration: ''
+        post_migration: ''
