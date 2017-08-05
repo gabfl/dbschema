@@ -22,7 +22,7 @@ def getConfig():
     """
 
     # Set location
-    configPath = '~/.dbschema.yml'
+    configPath = os.path.expanduser('~') + '/.dbschema.yml'
     if args.config:
         configPath = args.config
 
