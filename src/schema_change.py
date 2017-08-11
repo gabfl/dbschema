@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--config", type=str, help="Config file location (default: ~/.dbschema.yml)")
 parser.add_argument("-t", "--tag", type=str, help="Database tag")
 parser.add_argument("-r", "--rollback", type=str, help="Rollback a migration")
+parser.add_argument("-s", "--skip_missing", action='store_true', help="Skip missing migration folders")
 args = parser.parse_args()
 
 
@@ -287,7 +288,13 @@ def main():
         postMigration = databases[tag].get('post_migration')
 
         # Check if the migration path exists
-        checExists(path, 'dir')
+        if args.skip_missing:
+            try:
+                checExists(path, 'dir')
+            except RuntimeError:
+                continue
+        else:
+            checExists(path, 'dir')
 
         # Get database connection
         connection = getConnection(engine, host, user, port, password, db)
