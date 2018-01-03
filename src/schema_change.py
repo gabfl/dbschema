@@ -7,6 +7,7 @@ from glob import glob
 import yaml
 import argparse
 import pymysql.cursors
+import pymysql.constants.CLIENT
 import psycopg2.extras
 import psycopg2
 
@@ -105,7 +106,9 @@ def getMysqlConnection(host, user, port, password, database):
                                  password=password,
                                  db=database,
                                  charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
+                                 cursorclass=pymysql.cursors.DictCursor,
+                                 client_flag=pymysql.constants.CLIENT.MULTI_STATEMENTS
+                                 )
     return connection
 
 
