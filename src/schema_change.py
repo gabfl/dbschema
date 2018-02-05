@@ -125,18 +125,6 @@ def getPgConnection(host, user, port, password, database):
     return connection
 
 
-def queriesToList(queries):
-    """
-        Split queries into a list of individual queries
-    """
-
-    # Multiple queries
-    if ';' in queries:
-        return [query for query in queries.split(';') if query.strip()]
-
-    return [queries]
-
-
 def runMigration(connection, queries):
     """
         Apply a migration to the SQL server
@@ -144,9 +132,8 @@ def runMigration(connection, queries):
 
     # Execute query
     with connection.cursor() as cursorMig:
-        for query in queriesToList(queries):
-            cursorMig.execute(query)
-            connection.commit()
+        cursorMig.execute(queries)
+        connection.commit()
 
 
 def saveMigration(connection, basename):
