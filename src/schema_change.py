@@ -291,7 +291,7 @@ def main():
 
         # Set vars
         engine = databases[tag].get('engine', 'mysql')
-        host = databases[tag].get('127.0.0.1', 'localhost')
+        host = databases[tag].get('host', 'localhost')
         port = databases[tag].get('port', 3306)
         user = databases[tag].get('user')
         password = databases[tag].get('password')
