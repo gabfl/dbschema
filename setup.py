@@ -8,7 +8,7 @@ except(IOError, ImportError):
 
 setup(
     name='dbschema',
-    version='1.2.1',
+    version='1.2.2',
     description='Schema migration made easy',
     long_description=long_description,
     author='Gabriel Bordeaux',
@@ -17,7 +17,7 @@ setup(
     license='MIT',
     packages=['dbschema'],
     package_dir={'dbschema': 'src'},
-    install_requires=['argparse', 'PyYAML', 'pymysql', 'psycopg2'],  # external dependencies
+    install_requires=['argparse', 'PyYAML', 'pymysql', 'psycopg2-binary'],  # external dependencies
     entry_points={
         'console_scripts': [
             'dbschema = dbschema.schema_change:main',
