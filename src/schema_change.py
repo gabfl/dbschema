@@ -10,8 +10,6 @@ import pymysql.cursors
 import pymysql.constants.CLIENT
 import psycopg2.extras
 import psycopg2
-from pprint import pformat
-from inspect import getmembers
 
 # Parse arguments
 parser = argparse.ArgumentParser()
@@ -294,9 +292,6 @@ def main():
             value = databases[tag].get("ssl_" + key, None)
             if value is not None:
                 ssl[key] = value
-
-        # print(pformat(getmembers(ssl)))
-
 
         db = databases[tag].get('db')
         path = databases[tag].get('path')
