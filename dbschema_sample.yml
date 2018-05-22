@@ -15,9 +15,8 @@ databases:
         port: 3306
         user: gab
         password: azerty
-        ssl_ca: /etc/ssl/certs/your-ca-cert.pem
-
-        ssl_check_hostname: true # set to false to disable hostname checking of the server cert
+        # ssl_check_hostname: true # set to false to disable hostname checking of the server cert
+        # ssl_ca: /etc/ssl/certs/your-ca-cert.pem
         # ssl_cert: /path/to/client-cert.pem
         # ssl_key: /path/to/client-key.pem
         # ssl_cipher: 'cipher-name'
