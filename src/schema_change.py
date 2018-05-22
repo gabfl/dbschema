@@ -83,14 +83,14 @@ def getMigrationSource(file):
         return f.read()
 
 
-def getConnection(engine, host, user, port, password, database):
+def getConnection(engine, host, user, port, password, database, ssl):
     """
         Returns a PostgreSQL or MySQL connection
     """
 
     if engine == 'mysql':
         # Connection
-        return getMysqlConnection(host, user, port, password, database)
+        return getMysqlConnection(host, user, port, password, database, ssl)
     elif engine == 'postgresql':
         # Connection
         return getPgConnection(host, user, port, password, database)
@@ -98,7 +98,7 @@ def getConnection(engine, host, user, port, password, database):
         raise RuntimeError('`%s` is not a valid engine.' % engine)
 
 
-def getMysqlConnection(host, user, port, password, database):
+def getMysqlConnection(host, user, port, password, database, ssl):
     """
         MySQL connection
     """
@@ -110,7 +110,8 @@ def getMysqlConnection(host, user, port, password, database):
                                  db=database,
                                  charset='utf8mb4',
                                  cursorclass=pymysql.cursors.DictCursor,
-                                 client_flag=pymysql.constants.CLIENT.MULTI_STATEMENTS
+                                 client_flag=pymysql.constants.CLIENT.MULTI_STATEMENTS,
+                                 ssl=ssl
                                  )
     return connection
 
@@ -288,6 +289,13 @@ def main():
         port = databases[tag].get('port', 3306)
         user = databases[tag].get('user')
         password = databases[tag].get('password')
+
+        ssl = {}
+        for key in ["ca", "capath", "cert", "key", "cipher", "check_hostname"]:
+            value = databases[tag].get("ssl_" + key, None)
+            if value is not None:
+                ssl[key] = value
+
         db = databases[tag].get('db')
         path = databases[tag].get('path')
         preMigration = databases[tag].get('pre_migration')
@@ -303,7 +311,7 @@ def main():
             checExists(path, 'dir')
 
         # Get database connection
-        connection = getConnection(engine, host, user, port, password, db)
+        connection = getConnection(engine, host, user, port, password, db, ssl)
 
         # Run pre migration queries
         if preMigration:
