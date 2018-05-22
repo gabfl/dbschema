@@ -59,7 +59,10 @@ def getMigrationsFiles(path):
         List migrations folders
     """
 
-    return glob(path + '*/up.sql')
+    migrations = glob(path + '*/up.sql')
+    migrations.sort()
+
+    return migrations
 
 
 def getMigrationName(file):
