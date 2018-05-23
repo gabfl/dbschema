@@ -15,7 +15,7 @@ env:
   global:
   - PGPORT=5433
 before_install:
-  - cp src/unittest/utils/postgres/pg_hba.conf /etc/postgresql/10/main/pg_hba.conf
+  - sudo cp src/unittest/utils/postgres/pg_hba.conf /etc/postgresql/10/main/pg_hba.conf
   - sudo service postgresql restart
   - sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('my_password') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
   - sudo mysql_upgrade
