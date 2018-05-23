@@ -1,6 +1,7 @@
 import unittest
 import psycopg2
 import pymysql
+import datetime
 
 from .. import schema_change
 
@@ -132,6 +133,68 @@ class Test(unittest.TestCase):
 
         self.assertTrue(schema_change.is_applied(migrations_applied, 'three'))
         self.assertFalse(schema_change.is_applied(migrations_applied, 'four'))
+
+    def test_get_migrations_applied(self):
+        config = schema_change.get_config(self.config_path)
+        database = config['databases']['tag_postgresql']
+
+        # Get database connection
+        connection = schema_change.get_pg_connection(
+            database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
+
+        # Add fake migrations
+        schema_change.save_migration(connection, 'some_migration')
+        schema_change.save_migration(connection, 'some_migration_2')
+
+        migrations_applied = schema_change.get_migrations_applied(
+            database['engine'], connection)
+
+        for migration in migrations_applied:
+            self.assertIsInstance(migration['id'], int)
+            self.assertIsInstance(migration['name'], str)
+            self.assertIsInstance(migration['date'], datetime.datetime)
+
+        # Delete fake migrations
+        schema_change.delete_migration(connection, 'some_migration')
+        schema_change.delete_migration(connection, 'some_migration_2')
+
+    def test_apply_migrations(self):
+        config = schema_change.get_config(self.config_path)
+        database = config['databases']['tag_postgresql']
+
+        # Get database connection
+        connection = schema_change.get_pg_connection(
+            database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
+
+        self.assertTrue(schema_change.apply_migrations(
+            database['engine'], connection, database['path']))
+
+    def test_rollback_migration(self):
+        config = schema_change.get_config(self.config_path)
+        database = config['databases']['tag_postgresql']
+
+        # Get database connection
+        connection = schema_change.get_pg_connection(
+            database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
+
+        self.assertTrue(schema_change.rollback_migration(
+            database['engine'], connection, database['path'], 'one'))
+
+    def test_get_ssl(self):
+        config = schema_change.get_config(self.config_path)
+        database = config['databases']['tag_postgresql']
+
+        self.assertIsInstance(schema_change.get_ssl(database), dict)
+
+    def test_apply(self):
+        self.assertTrue(schema_change.apply(config_override=self.config_path))
+        self.assertTrue(schema_change.apply(config_override=self.config_path,
+                                            tag_override='tag_mysql'))
+        self.assertTrue(schema_change.apply(config_override=self.config_path,
+                                            tag_override='tag_mysql',
+                                            rollback='one'))
+        self.assertTrue(schema_change.apply(config_override=self.config_path,
+                                            skip_missing=True))
 
 
 if __name__ == '__main__':

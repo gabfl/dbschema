@@ -18,15 +18,15 @@ def get_config(override):
     """
 
     # Set location
-    configPath = os.path.expanduser('~') + '/.dbschema.yml'
+    config_path = os.path.expanduser('~') + '/.dbschema.yml'
     if override:
-        configPath = override
+        config_path = override
 
     # Check if the config file exists
-    check_exists(configPath)
+    check_exists(config_path)
 
     # Load config
-    with open(configPath) as f:
+    with open(config_path) as f:
         # use safe_load instead load
         config = yaml.safe_load(f)
 
@@ -211,7 +211,7 @@ def apply_migrations(engine, connection, path):
     """
 
     # Get migrations applied
-    migrationsApplied = get_migrations_applied(engine, connection)
+    migrations_applied = get_migrations_applied(engine, connection)
     # print(migrationsApplied)
 
     # Get migrations folder
@@ -220,7 +220,7 @@ def apply_migrations(engine, connection, path):
         basename = os.path.basename(os.path.dirname(file))
 
         # Skip migrations if they are already applied
-        if is_applied(migrationsApplied, basename):
+        if is_applied(migrations_applied, basename):
             continue
 
         # Get migration source
@@ -239,22 +239,24 @@ def apply_migrations(engine, connection, path):
     # Log
     print(' * Migrations applied')
 
+    return True
 
-def rollback_migration(engine, connection, path, migrationToRollback):
+
+def rollback_migration(engine, connection, path, migration_to_rollback):
     """
         Rollback a migration
     """
 
     # Get migrations applied
-    migrationsApplied = get_migrations_applied(engine, connection)
+    migrations_applied = get_migrations_applied(engine, connection)
 
     # Ensure that the migration was previously applied
-    if not is_applied(migrationsApplied, migrationToRollback):
+    if not is_applied(migrations_applied, migration_to_rollback):
         raise RuntimeError(
-            '`%s` is not in the list of previously applied migrations.' % (migrationToRollback))
+            '`%s` is not in the list of previously applied migrations.' % (migration_to_rollback))
 
     # Rollback file
-    file = path + migrationToRollback + '/down.sql'
+    file = path + migration_to_rollback + '/down.sql'
 
     # Ensure that the file exists
     check_exists(file)
@@ -275,10 +277,12 @@ def rollback_migration(engine, connection, path, migrationToRollback):
     # Log
     print('   -> Migration `%s` has been rolled back' % (basename))
 
+    return True
+
 
 def get_ssl(database):
     """
-        Returns SSL options
+        Returns SSL options for the selected engine
     """
 
     # Set available keys per engine
@@ -300,6 +304,10 @@ def get_ssl(database):
 
 
 def apply(config_override=None, tag_override=None, rollback=None, skip_missing=None):
+    """
+        Look thru migrations and apply them
+    """
+
     # Load config
     config = get_config(config_override)
     databases = config['databases']
@@ -322,8 +330,8 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
         password = databases[tag].get('password')
         db = databases[tag].get('db')
         path = databases[tag].get('path')
-        preMigration = databases[tag].get('pre_migration')
-        postMigration = databases[tag].get('post_migration')
+        pre_migration = databases[tag].get('pre_migration')
+        post_migration = databases[tag].get('post_migration')
 
         # Check if the migration path exists
         if skip_missing:
@@ -339,8 +347,8 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
             engine, host, user, port, password, db, get_ssl(databases[tag]))
 
         # Run pre migration queries
-        if preMigration:
-            run_migration(connection, preMigration)
+        if pre_migration:
+            run_migration(connection, pre_migration)
 
         if rollback:
             print(' * Rolling back %s (`%s` on %s)' % (tag, db, engine))
@@ -353,8 +361,10 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
             apply_migrations(engine, connection, path)
 
         # Run post migration queries
-        if postMigration:
-            run_migration(connection, postMigration)
+        if post_migration:
+            run_migration(connection, post_migration)
+
+    return True
 
 
 def main():
