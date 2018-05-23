@@ -2,24 +2,20 @@ language: python
 python:
   - "3.6"
 addons:
+  postgresql: "10"
   apt:
-    sources:
-      - mysql-5.7-trusty
     packages:
-      - postgresql-10
-      - postgresql-client-10
-      - mysql-server
-      - mysql-client
-  postgresql: 10
+    - postgresql-10
+    - postgresql-client-10
 env:
   global:
-  - PGPORT=5432
+  - PGPORT=5433
 before_install:
   - pip install pycodestyle
   - python3 setup.py install
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
-  - mysql -e 'CREATE DATABASE myapp_test;'
+  #- mysql -e 'CREATE DATABASE myapp_test;'
 script:
   - pycodestyle --exclude=venv --ignore=E501 .
   - pytest
