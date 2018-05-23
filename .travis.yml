@@ -4,9 +4,13 @@ python:
 addons:
   postgresql: "10"
   apt:
+    sources:
+      - mysql-5.7-trusty
     packages:
     - postgresql-10
     - postgresql-client-10
+    - mysql-server
+    - mysql-client
 env:
   global:
   - PGPORT=5433
