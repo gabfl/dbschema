@@ -10,6 +10,7 @@ addons:
       - postgresql-client-10
       - mysql-server
       - mysql-client
+  postgresql: 10
 env:
   global:
   - PGPORT=5432

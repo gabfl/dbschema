@@ -1,9 +1,9 @@
 databases:
     db1: # Unique tag
         engine: postgresql # Engine name (`postgresql` pr `mysql`)
-        host: 127.0.0.1 # Database host
+        host: localhost # Database host
         port: 5432 # Database port
-        user: travis # Username
+        user: postgres # Username
         password: '' # Optional password
         db: my_db # Database name
         # sslmode: require
@@ -12,12 +12,12 @@ databases:
         # sslrootcert: /etc/ssl/certs/your-ca-cert.pem
         # sslcrl: /etc/ssl/certs/crl.pem # Optional SSL certificate revocation list
         # sslcompression: 1
-        path: /path/to/migrations/ # Path to the migration folder
+        path: src/unittest/utils/migrations/postgresql/ # Path to the migration folder
         pre_migration: '' # Optional queries ran before migrating
-        post_migration: 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO gab; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO gab' # Optional queries ran after migrating
+        post_migration: 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres' # Optional queries ran after migrating
     db2:
         engine: mysql
-        host: 127.0.0.1
+        host: localhost
         port: 3306
         user: travis
         password: ''
@@ -28,6 +28,6 @@ databases:
         # ssl_ca: /etc/ssl/certs/your-ca-cert.pem
         # ssl_cipher: 'cipher-name'
         # ssl_capath: /path/to/ca-certs/
-        path: /path/to/migrations/
+        path: src/unittest/utils/migrations/mysql/
         pre_migration: ''
         post_migration: ''
