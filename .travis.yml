@@ -1,29 +1,15 @@
 language: python
 python:
   - "3.6"
-addons:
-  postgresql: "10"
-  apt:
-    sources:
-      - mysql-5.7-trusty
-    packages:
-    - postgresql-10
-    - postgresql-client-10
-    - mysql-server
-    - mysql-client
-env:
-  global:
-  - PGPORT=5433
+services:
+  - mysql
+  - postgresql
 before_install:
-  - sudo cp src/unittest/utils/postgres/pg_hba.conf /etc/postgresql/10/main/pg_hba.conf
-  - sudo service postgresql restart
-  - sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('my_password') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
-  - sudo service mysql restart
   - pip install pycodestyle
   - python3 setup.py install
 before_script:
-  - psql -c 'create database travis_ci_test;' -U postgres
-  #- mysql -e 'CREATE DATABASE myapp_test;'
+  - psql -c 'create database my_db;' -U postgres
+  - mysql -e 'CREATE DATABASE my_db;'
 script:
   - pycodestyle --exclude=venv --ignore=E501 .
   - pytest
