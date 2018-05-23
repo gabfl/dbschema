@@ -11,26 +11,16 @@ import pymysql.constants.CLIENT
 import psycopg2.extras
 import psycopg2
 
-# Parse arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--config", type=str,
-                    help="Config file location (default: ~/.dbschema.yml)")
-parser.add_argument("-t", "--tag", type=str, help="Database tag")
-parser.add_argument("-r", "--rollback", type=str, help="Rollback a migration")
-parser.add_argument("-s", "--skip_missing", action='store_true',
-                    help="Skip missing migration folders")
-args = parser.parse_args()
 
-
-def get_config():
+def get_config(override):
     """
         Get config file
     """
 
     # Set location
     configPath = os.path.expanduser('~') + '/.dbschema.yml'
-    if args.config:
-        configPath = args.config
+    if override:
+        configPath = override
 
     # Check if the config file exists
     check_exists(configPath)
@@ -303,19 +293,19 @@ def get_ssl(database):
     return ssl
 
 
-def main():
+def apply(config_override=None, tag_override=None, rollback=None, skip_missing=None):
     # Load config
-    config = get_config()
+    config = get_config(config_override)
     databases = config['databases']
 
     # If we are rolling back, ensure that we have a database tag
-    if args.rollback and not args.tag:
+    if rollback and not tag_override:
         raise RuntimeError(
             'To rollback a migration you need to specify the database tag with `--tag`')
 
     for tag in databases:
         # If a tag is specified, skip other tags
-        if args.tag and args.tag != tag:
+        if tag_override and tag_override != tag:
             continue
 
         # Set vars
@@ -331,7 +321,7 @@ def main():
         postMigration = databases[tag].get('post_migration')
 
         # Check if the migration path exists
-        if args.skip_missing:
+        if skip_missing:
             try:
                 check_exists(path, 'dir')
             except RuntimeError:
@@ -347,10 +337,10 @@ def main():
         if preMigration:
             run_migration(connection, preMigration)
 
-        if args.rollback:
+        if rollback:
             print(' * Rolling back %s (`%s` on %s)' % (tag, db, engine))
 
-            rollback_migration(engine, connection, path, args.rollback)
+            rollback_migration(engine, connection, path, rollback)
         else:
             print(' * Applying migrations for %s (`%s` on %s)' %
                   (tag, db, engine))
@@ -360,6 +350,21 @@ def main():
         # Run post migration queries
         if postMigration:
             run_migration(connection, postMigration)
+
+
+def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", type=str,
+                        help="Config file location (default: ~/.dbschema.yml)")
+    parser.add_argument("-t", "--tag", type=str, help="Database tag")
+    parser.add_argument("-r", "--rollback", type=str,
+                        help="Rollback a migration")
+    parser.add_argument("-s", "--skip_missing", action='store_true',
+                        help="Skip missing migration folders")
+    args = parser.parse_args()
+
+    apply(args.config, args.tag, args.rollback, args.skip_missing)
 
 
 if __name__ == "__main__":

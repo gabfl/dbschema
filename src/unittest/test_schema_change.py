@@ -5,6 +5,12 @@ from .. import schema_change
 
 class Test(unittest.TestCase):
 
+    def test_get_config(self):
+        config = schema_change.get_config(
+            'src/unittest/utils/config/dbschema.yml')
+
+        self.assertIsInstance(config, dict)
+
     def test_check_exists(self):
         self.assertTrue(schema_change.check_exists(
             'src/unittest/utils/migrations/mysql/one/up.sql'))
