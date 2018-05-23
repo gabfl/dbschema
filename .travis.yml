@@ -10,6 +10,9 @@ addons:
       - postgresql-client-10
       - mysql-server
       - mysql-client
+env:
+  global:
+  - PGPORT=5432
 before_install:
   - pip install pycodestyle
   - python3 setup.py install
