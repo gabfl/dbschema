@@ -15,6 +15,10 @@ Features:
 ### Install `dbschema`
 
 ```bash
+# Install required packages
+apt-get update
+apt-get install --yes libpq-dev gcc python3-dev
+
 pip3 install dbschema
 ```
 

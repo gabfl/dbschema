@@ -32,6 +32,10 @@ class Test(unittest.TestCase):
         self.assertTrue(
             'src/unittest/utils/migrations/mysql/three/up.sql' in migration_files)
 
+    def test_add_slash(self):
+        self.assertEqual(schema_change.add_slash('some/path')[-1], '/')
+        self.assertEqual(schema_change.add_slash('some/path/')[-1], '/')
+
     def test_get_migration_name(self):
         self.assertEqual(schema_change.get_migration_name(
             'src/unittest/utils/migrations/mysql/one/up.sql'), 'one')

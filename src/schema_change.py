@@ -59,6 +59,17 @@ def get_migrations_files(path):
     return migrations
 
 
+def add_slash(path):
+    """
+        Ensure that the path ends with a slash
+    """
+
+    if not path.endswith('/'):
+        return path + '/'
+
+    return path
+
+
 def get_migration_name(file):
     """
         Returns the migration name, for example:
@@ -329,7 +340,7 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
         user = databases[tag].get('user')
         password = databases[tag].get('password')
         db = databases[tag].get('db')
-        path = databases[tag].get('path')
+        path = add_slash(databases[tag].get('path'))
         pre_migration = databases[tag].get('pre_migration')
         post_migration = databases[tag].get('post_migration')
 
