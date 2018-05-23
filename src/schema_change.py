@@ -136,6 +136,8 @@ def run_migration(connection, queries):
         cursorMig.execute(queries)
         connection.commit()
 
+    return True
+
 
 def save_migration(connection, basename):
     """
@@ -149,6 +151,8 @@ def save_migration(connection, basename):
     with connection.cursor() as cursor:
         cursor.execute(sql, (basename,))
         connection.commit()
+
+    return True
 
 
 def delete_migration(connection, basename):
@@ -164,13 +168,15 @@ def delete_migration(connection, basename):
         cursor.execute(sql, (basename,))
         connection.commit()
 
+    return True
 
-def is_applied(migrationsApplied, migrationName):
+
+def is_applied(migrations_applied, migration_name):
     """
         Check if a migration we want to run is already in the list of applied migrations
     """
 
-    return [True for migrationApplied in migrationsApplied if migrationApplied['name'] == migrationName]
+    return [True for migration in migrations_applied if migration['name'] == migration_name]
 
 
 def get_migrations_applied(engine, connection):

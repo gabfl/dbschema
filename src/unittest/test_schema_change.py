@@ -85,6 +85,54 @@ class Test(unittest.TestCase):
         self.assertIsInstance(
             connection, psycopg2.extensions.connection)
 
+    def test_run_migration(self):
+        config = schema_change.get_config(self.config_path)
+        database = config['databases']['tag_postgresql']
+
+        # Get database connection
+        connection = schema_change.get_pg_connection(
+            database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
+
+        self.assertTrue(schema_change.run_migration(connection, 'SELECT 1'))
+
+    def test_save_migration(self):
+        config = schema_change.get_config(self.config_path)
+        database = config['databases']['tag_postgresql']
+
+        # Get database connection
+        connection = schema_change.get_pg_connection(
+            database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
+
+        self.assertTrue(schema_change.save_migration(
+            connection, 'some_migration'))
+
+    def test_delete_migration(self):
+        config = schema_change.get_config(self.config_path)
+        database = config['databases']['tag_postgresql']
+
+        # Get database connection
+        connection = schema_change.get_pg_connection(
+            database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
+
+        self.assertTrue(schema_change.delete_migration(
+            connection, 'some_migration'))
+
+    def test_is_applied(self):
+        migrations_applied = [
+            {
+                'name': 'one'
+            },
+            {
+                'name': 'two'
+            },
+            {
+                'name': 'three'
+            },
+        ]
+
+        self.assertTrue(schema_change.is_applied(migrations_applied, 'three'))
+        self.assertFalse(schema_change.is_applied(migrations_applied, 'four'))
+
 
 if __name__ == '__main__':
     unittest.main()
