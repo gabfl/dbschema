@@ -22,7 +22,7 @@ parser.add_argument("-s", "--skip_missing", action='store_true',
 args = parser.parse_args()
 
 
-def getConfig():
+def get_config():
     """
         Get config file
     """
@@ -33,7 +33,7 @@ def getConfig():
         configPath = args.config
 
     # Check if the config file exists
-    checkExists(configPath)
+    check_exists(configPath)
 
     # Load config
     with open(configPath) as f:
@@ -43,7 +43,7 @@ def getConfig():
     return config
 
 
-def checkExists(path, type='file'):
+def check_exists(path, type='file'):
     """
         Check if a file or a folder exists
     """
@@ -58,7 +58,7 @@ def checkExists(path, type='file'):
     return True
 
 
-def getMigrationsFiles(path):
+def get_migrations_files(path):
     """
         List migrations folders
     """
@@ -69,7 +69,7 @@ def getMigrationsFiles(path):
     return migrations
 
 
-def getMigrationName(file):
+def get_migration_name(file):
     """
         Returns the migration name, for example:
         `/path/to/migrations/migration1/up.sql` -> `migration1`
@@ -78,7 +78,7 @@ def getMigrationName(file):
     return os.path.basename(os.path.dirname(file))
 
 
-def getMigrationSource(file):
+def get_migration_source(file):
     """
         Returns migration source code
     """
@@ -87,22 +87,22 @@ def getMigrationSource(file):
         return f.read()
 
 
-def getConnection(engine, host, user, port, password, database, ssl):
+def get_connection(engine, host, user, port, password, database, ssl):
     """
         Returns a PostgreSQL or MySQL connection
     """
 
     if engine == 'mysql':
         # Connection
-        return getMysqlConnection(host, user, port, password, database, ssl)
+        return get_mysql_connection(host, user, port, password, database, ssl)
     elif engine == 'postgresql':
         # Connection
-        return getPgConnection(host, user, port, password, database, ssl)
+        return get_pg_connection(host, user, port, password, database, ssl)
     else:
         raise RuntimeError('`%s` is not a valid engine.' % engine)
 
 
-def getMysqlConnection(host, user, port, password, database, ssl):
+def get_mysql_connection(host, user, port, password, database, ssl):
     """
         MySQL connection
     """
@@ -120,7 +120,7 @@ def getMysqlConnection(host, user, port, password, database, ssl):
     return connection
 
 
-def getPgConnection(host, user, port, password, database, ssl):
+def get_pg_connection(host, user, port, password, database, ssl):
     """
         PostgreSQL connection
     """
@@ -138,7 +138,7 @@ def getPgConnection(host, user, port, password, database, ssl):
     return connection
 
 
-def runMigration(connection, queries):
+def run_migration(connection, queries):
     """
         Apply a migration to the SQL server
     """
@@ -149,7 +149,7 @@ def runMigration(connection, queries):
         connection.commit()
 
 
-def saveMigration(connection, basename):
+def save_migration(connection, basename):
     """
         Save a migration in `migrations_applied` table
     """
@@ -163,7 +163,7 @@ def saveMigration(connection, basename):
         connection.commit()
 
 
-def deleteMigration(connection, basename):
+def delete_migration(connection, basename):
     """
         Delete a migration in `migrations_applied` table
     """
@@ -177,7 +177,7 @@ def deleteMigration(connection, basename):
         connection.commit()
 
 
-def isApplied(migrationsApplied, migrationName):
+def is_applied(migrationsApplied, migrationName):
     """
         Check if a migration we want to run is already in the list of applied migrations
     """
@@ -185,7 +185,7 @@ def isApplied(migrationsApplied, migrationName):
     return [True for migrationApplied in migrationsApplied if migrationApplied['name'] == migrationName]
 
 
-def getMigrationsApplied(engine, connection):
+def get_migrations_applied(engine, connection):
     """
         Get list of migrations already applied
     """
@@ -211,33 +211,33 @@ def getMigrationsApplied(engine, connection):
             'The table `migrations_applied` is missing. Please refer to the project documentation at https://github.com/gabfl/dbschema.')
 
 
-def applyMigrations(engine, connection, path):
+def apply_migrations(engine, connection, path):
     """
         Apply all migrations in a chronological order
     """
 
     # Get migrations applied
-    migrationsApplied = getMigrationsApplied(engine, connection)
+    migrationsApplied = get_migrations_applied(engine, connection)
     # print(migrationsApplied)
 
     # Get migrations folder
-    for file in getMigrationsFiles(path):
+    for file in get_migrations_files(path):
         # Set vars
         basename = os.path.basename(os.path.dirname(file))
 
         # Skip migrations if they are already applied
-        if isApplied(migrationsApplied, basename):
+        if is_applied(migrationsApplied, basename):
             continue
 
         # Get migration source
-        source = getMigrationSource(file)
+        source = get_migration_source(file)
         # print (source);
 
         # Run migration
-        runMigration(connection, source)
+        run_migration(connection, source)
 
         # Save migration
-        saveMigration(connection, basename)
+        save_migration(connection, basename)
 
         # Log
         print('   -> Migration `%s` applied' % (basename))
@@ -246,16 +246,16 @@ def applyMigrations(engine, connection, path):
     print(' * Migrations applied')
 
 
-def rollbackMigration(engine, connection, path, migrationToRollback):
+def rollback_migration(engine, connection, path, migrationToRollback):
     """
         Rollback a migration
     """
 
     # Get migrations applied
-    migrationsApplied = getMigrationsApplied(engine, connection)
+    migrationsApplied = get_migrations_applied(engine, connection)
 
     # Ensure that the migration was previously applied
-    if not isApplied(migrationsApplied, migrationToRollback):
+    if not is_applied(migrationsApplied, migrationToRollback):
         raise RuntimeError(
             '`%s` is not in the list of previously applied migrations.' % (migrationToRollback))
 
@@ -263,26 +263,26 @@ def rollbackMigration(engine, connection, path, migrationToRollback):
     file = path + migrationToRollback + '/down.sql'
 
     # Ensure that the file exists
-    checkExists(file)
+    check_exists(file)
 
     # Set vars
     basename = os.path.basename(os.path.dirname(file))
 
     # Get migration source
-    source = getMigrationSource(file)
+    source = get_migration_source(file)
     # print (source);
 
     # Run migration rollback
-    runMigration(connection, source)
+    run_migration(connection, source)
 
     # Delete migration
-    deleteMigration(connection, basename)
+    delete_migration(connection, basename)
 
     # Log
     print('   -> Migration `%s` has been rolled back' % (basename))
 
 
-def getSsl(database):
+def get_ssl(database):
     """
         Returns SSL options
     """
@@ -307,7 +307,7 @@ def getSsl(database):
 
 def main():
     # Load config
-    config = getConfig()
+    config = get_config()
     databases = config['databases']
 
     # If we are rolling back, ensure that we have a database tag
@@ -335,33 +335,33 @@ def main():
         # Check if the migration path exists
         if args.skip_missing:
             try:
-                checkExists(path, 'dir')
+                check_exists(path, 'dir')
             except RuntimeError:
                 continue
         else:
-            checkExists(path, 'dir')
+            check_exists(path, 'dir')
 
         # Get database connection
-        connection = getConnection(
-            engine, host, user, port, password, db, getSsl(databases[tag]))
+        connection = get_connection(
+            engine, host, user, port, password, db, get_ssl(databases[tag]))
 
         # Run pre migration queries
         if preMigration:
-            runMigration(connection, preMigration)
+            run_migration(connection, preMigration)
 
         if args.rollback:
             print(' * Rolling back %s (`%s` on %s)' % (tag, db, engine))
 
-            rollbackMigration(engine, connection, path, args.rollback)
+            rollback_migration(engine, connection, path, args.rollback)
         else:
             print(' * Applying migrations for %s (`%s` on %s)' %
                   (tag, db, engine))
 
-            applyMigrations(engine, connection, path)
+            apply_migrations(engine, connection, path)
 
         # Run post migration queries
         if postMigration:
-            runMigration(connection, postMigration)
+            run_migration(connection, postMigration)
 
 
 if __name__ == "__main__":
