@@ -1,5 +1,7 @@
 # dbschema
 
+[![Build Status](https://travis-ci.org/gabfl/dbschema.svg?branch=master)](https://travis-ci.org/gabfl/dbschema)
+
 `dbschema` is a tool to run MySQL or PostgreSQL migrations automatically. Using a table, it keeps a state of previous migrations to avoid duplicates.
 
 Features:
@@ -13,6 +15,10 @@ Features:
 ### Install `dbschema`
 
 ```bash
+# Install required packages
+apt-get update
+apt-get install --yes libpq-dev gcc python3-dev
+
 pip3 install dbschema
 ```
 
