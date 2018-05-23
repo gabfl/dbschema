@@ -2,7 +2,7 @@ databases:
     db1: # Unique tag
         engine: postgresql # Engine name (`postgresql` pr `mysql`)
         host: localhost # Database host
-        port: 5432 # Database port
+        port: 5433 # Database port
         user: postgres # Username
         password: '' # Optional password
         db: my_db # Database name
@@ -19,8 +19,8 @@ databases:
         engine: mysql
         host: localhost
         port: 3306
-        user: travis
-        password: ''
+        user: root
+        password: 'my_password'
         db: my_db
         # ssl_check_hostname: true # set to false to disable hostname checking of the server cert
         # ssl_cert: /path/to/client-cert.pem
