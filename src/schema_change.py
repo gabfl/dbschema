@@ -289,7 +289,8 @@ def getSsl(database):
 
     # Set available keys per engine
     if database['engine'] == 'postgresql':
-        keys = ['sslmode', 'sslcert', 'sslkey', 'sslrootcert']
+        keys = ['sslmode', 'sslcert', 'sslkey',
+                'sslrootcert', 'sslcrl', 'sslcompression']
     else:
         ['ssl_ca', 'ssl_capath', 'ssl_cert', 'ssl_key',
             'ssl_cipher', 'ssl_check_hostname']
