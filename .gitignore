@@ -11,6 +11,9 @@ venv/
 # Mac
 .DS_Store
 
+# tests
+src/unittest/utils/config/dbschema2.yml
+
 # Misc
 tests/
 local/

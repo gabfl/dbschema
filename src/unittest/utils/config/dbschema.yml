@@ -1,5 +1,5 @@
 databases:
-    db1: # Unique tag
+    tag_postgresql: # Unique tag
         engine: postgresql # Engine name (`postgresql` pr `mysql`)
         host: localhost # Database host
         port: 5432 # Database port
@@ -15,7 +15,7 @@ databases:
         path: src/unittest/utils/migrations/postgresql/ # Path to the migration folder
         pre_migration: '' # Optional queries ran before migrating
         post_migration: 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres' # Optional queries ran after migrating
-    db2:
+    tag_mysql:
         engine: mysql
         host: localhost
         port: 3306

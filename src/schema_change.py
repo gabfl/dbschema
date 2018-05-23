@@ -77,7 +77,7 @@ def get_migration_source(file):
         return f.read()
 
 
-def get_connection(engine, host, user, port, password, database, ssl):
+def get_connection(engine, host, user, port, password, database, ssl={}):
     """
         Returns a PostgreSQL or MySQL connection
     """
@@ -92,7 +92,7 @@ def get_connection(engine, host, user, port, password, database, ssl):
         raise RuntimeError('`%s` is not a valid engine.' % engine)
 
 
-def get_mysql_connection(host, user, port, password, database, ssl):
+def get_mysql_connection(host, user, port, password, database, ssl={}):
     """
         MySQL connection
     """
@@ -109,7 +109,7 @@ def get_mysql_connection(host, user, port, password, database, ssl):
                            )
 
 
-def get_pg_connection(host, user, port, password, database, ssl):
+def get_pg_connection(host, user, port, password, database, ssl={}):
     """
         PostgreSQL connection
     """
@@ -280,8 +280,8 @@ def get_ssl(database):
         keys = ['sslmode', 'sslcert', 'sslkey',
                 'sslrootcert', 'sslcrl', 'sslcompression']
     else:
-        ['ssl_ca', 'ssl_capath', 'ssl_cert', 'ssl_key',
-            'ssl_cipher', 'ssl_check_hostname']
+        keys = ['ssl_ca', 'ssl_capath', 'ssl_cert', 'ssl_key',
+                'ssl_cipher', 'ssl_check_hostname']
 
     # Loop thru keys
     ssl = {}
@@ -314,7 +314,6 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
         port = databases[tag].get('port', 3306)
         user = databases[tag].get('user')
         password = databases[tag].get('password')
-
         db = databases[tag].get('db')
         path = databases[tag].get('path')
         preMigration = databases[tag].get('pre_migration')
