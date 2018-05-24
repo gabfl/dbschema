@@ -219,7 +219,8 @@ class Test(unittest.TestCase):
         self.assertIsInstance(schema_change.get_ssl(database), dict)
 
     def test_apply(self):
-        self.assertTrue(schema_change.apply(config_override=self.config_path))
+        self.assertTrue(schema_change.apply(config_override=self.config_path,
+                                            skip_missing=True))
         self.assertTrue(schema_change.apply(config_override=self.config_path,
                                             tag_override='tag_mysql'))
         self.assertTrue(schema_change.apply(config_override=self.config_path,

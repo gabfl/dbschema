@@ -337,12 +337,12 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
         engine = databases[tag].get('engine', 'mysql')
         host = databases[tag].get('host', 'localhost')
         port = databases[tag].get('port', 3306)
-        user = databases[tag].get('user')
-        password = databases[tag].get('password')
-        db = databases[tag].get('db')
-        path = add_slash(databases[tag].get('path'))
-        pre_migration = databases[tag].get('pre_migration')
-        post_migration = databases[tag].get('post_migration')
+        user = databases[tag]['user']
+        password = databases[tag]['password']
+        db = databases[tag]['db']
+        path = add_slash(databases[tag]['path'])
+        pre_migration = databases[tag].get('pre_migration', None)
+        post_migration = databases[tag].get('post_migration', None)
 
         # Check if the migration path exists
         if skip_missing:
