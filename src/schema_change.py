@@ -12,7 +12,7 @@ import psycopg2.extras
 import psycopg2
 
 
-def get_config(override):
+def get_config(override=None):
     """
         Get config file
     """

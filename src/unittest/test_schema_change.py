@@ -16,6 +16,12 @@ class Test(unittest.TestCase):
 
         self.assertIsInstance(config, dict)
 
+    def test_get_config_2(self):
+        # Test loading from home directory
+        config = schema_change.get_config()
+
+        self.assertIsInstance(config, dict)
+
     def test_check_exists(self):
         self.assertTrue(schema_change.check_exists(
             'src/unittest/utils/migrations/mysql/one/up.sql'))

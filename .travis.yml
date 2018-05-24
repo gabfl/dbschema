@@ -7,6 +7,7 @@ services:
 before_install:
   - pip install pycodestyle codecov
   - python3 setup.py install
+  - cp src/unittest/utils/config/dbschema.yml ~/.dbschema.yml
 before_script:
   - psql -c 'create database my_db;' -U postgres
   - psql -c 'create database my_empty_db;' -U postgres

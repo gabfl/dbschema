@@ -29,8 +29,6 @@ databases:
         # ssl_cipher: 'cipher-name'
         # ssl_capath: /path/to/ca-certs/
         path: src/unittest/utils/migrations/mysql/
-        pre_migration: 'SELECT 1;'
-        post_migration: 'SELECT 1;'
     tag_mysql_wrong_path:
         engine: mysql
         host: localhost
