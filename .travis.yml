@@ -5,7 +5,7 @@ services:
   - mysql
   - postgresql
 before_install:
-  - pip install pycodestyle
+  - pip install pycodestyle codecov
   - python3 setup.py install
 before_script:
   - psql -c 'create database my_db;' -U postgres
@@ -15,3 +15,7 @@ before_script:
 script:
   - pycodestyle --exclude=venv --ignore=E501 .
   - pytest
+  - coverage run --branch --source=. -m unittest discover -bv
+  - coverage report -m
+after_success:
+  - codecov
