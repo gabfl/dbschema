@@ -17,6 +17,7 @@ coverage.xml
 
 # tests
 src/unittest/utils/config/dbschema2.yml
+src/unittest/utils/config/dbschema_empty_db2.yml
 
 # Misc
 tests/

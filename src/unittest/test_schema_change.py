@@ -9,9 +9,16 @@ from .. import schema_change
 class Test(unittest.TestCase):
 
     config_path = 'src/unittest/utils/config/dbschema.yml'
+    config_path_empty_db = 'src/unittest/utils/config/dbschema_empty_db.yml'
 
     def test_get_config(self):
         config = schema_change.get_config(self.config_path)
+
+        self.assertIsInstance(config, dict)
+
+    def test_get_config_2(self):
+        # Test loading from home directory
+        config = schema_change.get_config()
 
         self.assertIsInstance(config, dict)
 
@@ -20,6 +27,12 @@ class Test(unittest.TestCase):
             'src/unittest/utils/migrations/mysql/one/up.sql'))
         self.assertTrue(schema_change.check_exists(
             'src/unittest/utils/migrations/mysql/one/', 'dir'))
+
+        # Check exceptions for non existent
+        self.assertRaises(RuntimeError, schema_change.check_exists,
+                          'src/unittest/utils/non_existent')
+        self.assertRaises(RuntimeError, schema_change.check_exists,
+                          'src/unittest/utils/non_existent', 'dir')
 
     def test_get_migrations_files(self):
         migration_files = schema_change.get_migrations_files(
@@ -67,6 +80,10 @@ class Test(unittest.TestCase):
             else:
                 self.assertIsInstance(
                     connection, pymysql.connections.Connection)
+
+        # Test exception for non existing engine
+        self.assertRaises(RuntimeError, schema_change.get_connection,
+                          'unknown_engine', None, None, None, None, None)
 
     def test_get_mysql_connection(self):
         config = schema_change.get_config(self.config_path)
@@ -162,6 +179,21 @@ class Test(unittest.TestCase):
         schema_change.delete_migration(connection, 'some_migration')
         schema_change.delete_migration(connection, 'some_migration_2')
 
+    def test_get_migrations_applied_2(self):
+        # Only loading empty databases to trigger an exception
+        config = schema_change.get_config(self.config_path_empty_db)
+
+        for tag in config['databases']:
+            database = config['databases'][tag]
+
+            # Get database connection
+            connection = schema_change.get_connection(
+                database['engine'], database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
+
+            # Test exception for non existing engine
+            self.assertRaises(RuntimeError, schema_change.get_migrations_applied,
+                              database['engine'], connection)
+
     def test_apply_migrations(self):
         config = schema_change.get_config(self.config_path)
         database = config['databases']['tag_postgresql']
@@ -184,14 +216,21 @@ class Test(unittest.TestCase):
         self.assertTrue(schema_change.rollback_migration(
             database['engine'], connection, database['path'], 'one'))
 
+        # Test exception for non existing engine
+        self.assertRaises(RuntimeError, schema_change.rollback_migration,
+                          database['engine'], connection, database['path'], 'non_existent')
+
     def test_get_ssl(self):
         config = schema_change.get_config(self.config_path)
-        database = config['databases']['tag_postgresql']
 
-        self.assertIsInstance(schema_change.get_ssl(database), dict)
+        for tag in config['databases']:
+            database = config['databases'][tag]
+
+            self.assertIsInstance(schema_change.get_ssl(database), dict)
 
     def test_apply(self):
-        self.assertTrue(schema_change.apply(config_override=self.config_path))
+        self.assertTrue(schema_change.apply(config_override=self.config_path,
+                                            skip_missing=True))
         self.assertTrue(schema_change.apply(config_override=self.config_path,
                                             tag_override='tag_mysql'))
         self.assertTrue(schema_change.apply(config_override=self.config_path,
@@ -199,6 +238,10 @@ class Test(unittest.TestCase):
                                             rollback='one'))
         self.assertTrue(schema_change.apply(config_override=self.config_path,
                                             skip_missing=True))
+
+        # Test exception for rollback without a tag
+        self.assertRaises(RuntimeError, schema_change.apply,
+                          self.config_path, None, 'one')
 
 
 if __name__ == '__main__':
