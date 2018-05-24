@@ -1,0 +1,17 @@
+databases:
+    tag_postgresql_empty:
+        engine: postgresql
+        host: localhost
+        port: 5432
+        user: postgres
+        password: ''
+        db: my_empty_db
+        path: src/unittest/utils/migrations/postgresql/
+    tag_mysql_empty:
+        engine: mysql
+        host: localhost
+        port: 3306
+        user: travis
+        password: ''
+        db: my_empty_db
+        path: src/unittest/utils/migrations/mysql/

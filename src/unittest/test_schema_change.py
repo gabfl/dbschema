@@ -9,6 +9,7 @@ from .. import schema_change
 class Test(unittest.TestCase):
 
     config_path = 'src/unittest/utils/config/dbschema.yml'
+    config_path_empty_db = 'src/unittest/utils/config/dbschema_empty_db.yml'
 
     def test_get_config(self):
         config = schema_change.get_config(self.config_path)
@@ -173,14 +174,15 @@ class Test(unittest.TestCase):
         schema_change.delete_migration(connection, 'some_migration_2')
 
     def test_get_migrations_applied_2(self):
-        config = schema_change.get_config(self.config_path)
+        # Only loading empty databases to trigger an exception
+        config = schema_change.get_config(self.config_path_empty_db)
 
         for tag in config['databases']:
             database = config['databases'][tag]
 
             # Get database connection
             connection = schema_change.get_connection(
-                database['engine'], database['host'], database['user'], database['port'], database['password'], 'my_empty_db', schema_change.get_ssl(database))
+                database['engine'], database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
 
             # Test exception for non existing engine
             self.assertRaises(RuntimeError, schema_change.get_migrations_applied,
