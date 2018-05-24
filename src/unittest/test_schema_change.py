@@ -214,9 +214,11 @@ class Test(unittest.TestCase):
 
     def test_get_ssl(self):
         config = schema_change.get_config(self.config_path)
-        database = config['databases']['tag_postgresql']
 
-        self.assertIsInstance(schema_change.get_ssl(database), dict)
+        for tag in config['databases']:
+            database = config['databases'][tag]
+
+            self.assertIsInstance(schema_change.get_ssl(database), dict)
 
     def test_apply(self):
         self.assertTrue(schema_change.apply(config_override=self.config_path,
