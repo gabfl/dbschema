@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/gabfl/dbschema.svg?branch=master)](https://travis-ci.org/gabfl/dbschema)
 [![codecov](https://codecov.io/gh/gabfl/dbschema/branch/master/graph/badge.svg)](https://codecov.io/gh/gabfl/dbschema)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-green.svg)](https://raw.githubusercontent.com/gabfl/dbschema/master/LICENSE)
 
 `dbschema` is a tool to run MySQL or PostgreSQL migrations automatically. Using a table, it keeps a state of previous migrations to avoid duplicates.
 
