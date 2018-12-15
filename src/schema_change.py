@@ -336,7 +336,7 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
         raise RuntimeError(
             'To rollback a migration you need to specify the database tag with `--tag`')
 
-    for tag in databases:
+    for tag in sorted(databases):
         # If a tag is specified, skip other tags
         if tag_override and tag_override != tag:
             continue
