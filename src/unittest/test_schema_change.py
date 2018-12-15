@@ -233,7 +233,7 @@ $$;"""
             database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
 
         self.assertTrue(schema_change.run_migration(
-            connection, 'SELECT 1'), engine='postgresql')
+            connection, 'SELECT 1', engine='postgresql'))
 
     def test_save_migration(self):
         config = schema_change.get_config(self.config_path)
