@@ -161,8 +161,12 @@ def parse_statements(queries_input):
         # Statement is not finished
         if sql_delimiter not in line and k != len(lines) - 1:
             # Append line
-            query += line
+            query += line + ' '
         else:  # Statement is finished
+            # Replace non default delimiter
+            if sql_delimiter != ';' and line.endswith(sql_delimiter):
+                line = line.replace(sql_delimiter, ';')
+
             queries.append(query + line)
             query = ''
 
@@ -180,7 +184,7 @@ def run_migration(connection, queries):
         queries = parse_statements(queries)
 
         for query in queries:
-            cursorMig.execute(queries)
+            cursorMig.execute(query)
         connection.commit()
 
     return True
