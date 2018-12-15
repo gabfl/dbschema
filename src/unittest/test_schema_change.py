@@ -107,6 +107,42 @@ class Test(unittest.TestCase):
         self.assertIsInstance(
             connection, psycopg2.extensions.connection)
 
+    def test_parse_statements(self):
+        queries = """SELECT 1;"""
+        parsed = schema_change.parse_statements(queries)
+        assert len(parsed) == 1
+        assert parsed[0] == 'SELECT 1;'
+
+    def test_parse_statements_2(self):
+        queries = """SELECT 1"""
+        parsed = schema_change.parse_statements(queries)
+        assert len(parsed) == 1
+        assert parsed[0] == 'SELECT 1'
+
+    def test_parse_statements_3(self):
+        queries = """
+        SELECT 1;
+        SELECT 2;
+        """
+        parsed = schema_change.parse_statements(queries)
+        assert len(parsed) == 2
+        assert parsed[0] == 'SELECT 1'
+        assert parsed[1] == 'SELECT 2'
+
+    def test_parse_statements_4(self):
+        queries = """
+        SELECT 1;
+        DELIMITER $$
+        SELECT 2$$
+        DELIMITER ;
+        SELECT 3;
+        """
+        parsed = schema_change.parse_statements(queries)
+        assert len(parsed) == 3
+        assert parsed[0] == 'SELECT 1'
+        assert parsed[1] == 'SELECT 2'
+        assert parsed[2] == 'SELECT 3'
+
     def test_run_migration(self):
         config = schema_change.get_config(self.config_path)
         database = config['databases']['tag_postgresql']

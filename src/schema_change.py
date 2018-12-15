@@ -137,6 +137,38 @@ def get_pg_connection(host, user, port, password, database, ssl={}):
                             )
 
 
+def parse_statements(queries_input):
+    queries = []
+    query = ''
+    sql_delimiter = ';'
+
+    # Split input by lines
+    lines = queries_input.strip().split('\n')
+
+    for k, line in enumerate(lines):
+        # Strip line
+        line = line.strip()
+
+        # Skip empty lines and comments
+        if not line or line.startswith('--'):
+            continue
+
+        # Detect new SQL delimiter
+        if line.upper().startswith('DELIMITER '):
+            sql_delimiter = line.split()[1]
+            continue
+
+        # Statement is not finished
+        if sql_delimiter not in line and k != len(lines) - 1:
+            # Append line
+            query += line
+        else:  # Statement is finished
+            queries.append(query + line)
+            query = ''
+
+    return queries
+
+
 def run_migration(connection, queries):
     """
         Apply a migration to the SQL server
