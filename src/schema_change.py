@@ -13,9 +13,7 @@ import psycopg2
 
 
 def get_config(override=None):
-    """
-        Get config file
-    """
+    """ Get config file """
 
     # Set location
     config_path = os.path.expanduser('~') + '/.dbschema.yml'
@@ -34,9 +32,7 @@ def get_config(override=None):
 
 
 def check_exists(path, type='file'):
-    """
-        Check if a file or a folder exists
-    """
+    """ Check if a file or a folder exists """
 
     if type == 'file':
         if not os.path.isfile(path):
@@ -49,9 +45,7 @@ def check_exists(path, type='file'):
 
 
 def get_migrations_files(path):
-    """
-        List migrations folders
-    """
+    """ List migrations folders """
 
     migrations = glob(path + '*/up.sql')
     migrations.sort()
@@ -60,9 +54,7 @@ def get_migrations_files(path):
 
 
 def add_slash(path):
-    """
-        Ensure that the path ends with a slash
-    """
+    """ Ensure that the path ends with a slash """
 
     if not path.endswith('/'):
         return path + '/'
@@ -80,18 +72,14 @@ def get_migration_name(file):
 
 
 def get_migration_source(file):
-    """
-        Returns migration source code
-    """
+    """ Returns migration source code """
 
     with open(file, "r") as f:
         return f.read()
 
 
 def get_connection(engine, host, user, port, password, database, ssl={}):
-    """
-        Returns a PostgreSQL or MySQL connection
-    """
+    """ Returns a PostgreSQL or MySQL connection """
 
     if engine == 'mysql':
         # Connection
@@ -104,9 +92,7 @@ def get_connection(engine, host, user, port, password, database, ssl={}):
 
 
 def get_mysql_connection(host, user, port, password, database, ssl={}):
-    """
-        MySQL connection
-    """
+    """ MySQL connection """
 
     return pymysql.connect(host=host,
                            user=user,
@@ -121,9 +107,7 @@ def get_mysql_connection(host, user, port, password, database, ssl={}):
 
 
 def get_pg_connection(host, user, port, password, database, ssl={}):
-    """
-        PostgreSQL connection
-    """
+    """ PostgreSQL connection """
 
     return psycopg2.connect(host=host,
                             user=user,
@@ -138,6 +122,8 @@ def get_pg_connection(host, user, port, password, database, ssl={}):
 
 
 def parse_statements(queries_input):
+    """ Parse input and return a list of SQL statements """
+
     queries = []
     query = ''
     sql_delimiter = ';'
@@ -174,9 +160,7 @@ def parse_statements(queries_input):
 
 
 def run_migration(connection, queries):
-    """
-        Apply a migration to the SQL server
-    """
+    """ Apply a migration to the SQL server """
 
     # Execute query
     with connection.cursor() as cursorMig:
@@ -191,9 +175,7 @@ def run_migration(connection, queries):
 
 
 def save_migration(connection, basename):
-    """
-        Save a migration in `migrations_applied` table
-    """
+    """ Save a migration in `migrations_applied` table """
 
     # Prepare query
     sql = "INSERT INTO migrations_applied (name, date) VALUES (%s, NOW())"
@@ -207,9 +189,7 @@ def save_migration(connection, basename):
 
 
 def delete_migration(connection, basename):
-    """
-        Delete a migration in `migrations_applied` table
-    """
+    """ Delete a migration in `migrations_applied` table """
 
     # Prepare query
     sql = "DELETE FROM migrations_applied WHERE name = %s"
@@ -223,17 +203,13 @@ def delete_migration(connection, basename):
 
 
 def is_applied(migrations_applied, migration_name):
-    """
-        Check if a migration we want to run is already in the list of applied migrations
-    """
+    """ Check if a migration we want to run is already in the list of applied migrations """
 
     return [True for migration in migrations_applied if migration['name'] == migration_name]
 
 
 def get_migrations_applied(engine, connection):
-    """
-        Get list of migrations already applied
-    """
+    """ Get list of migrations already applied """
 
     try:
         # Get cursor based on engine
@@ -257,9 +233,7 @@ def get_migrations_applied(engine, connection):
 
 
 def apply_migrations(engine, connection, path):
-    """
-        Apply all migrations in a chronological order
-    """
+    """ Apply all migrations in a chronological order """
 
     # Get migrations applied
     migrations_applied = get_migrations_applied(engine, connection)
@@ -294,9 +268,7 @@ def apply_migrations(engine, connection, path):
 
 
 def rollback_migration(engine, connection, path, migration_to_rollback):
-    """
-        Rollback a migration
-    """
+    """ Rollback a migration """
 
     # Get migrations applied
     migrations_applied = get_migrations_applied(engine, connection)
@@ -332,9 +304,7 @@ def rollback_migration(engine, connection, path, migration_to_rollback):
 
 
 def get_ssl(database):
-    """
-        Returns SSL options for the selected engine
-    """
+    """ Returns SSL options for the selected engine """
 
     # Set available keys per engine
     if database['engine'] == 'postgresql':
@@ -355,9 +325,7 @@ def get_ssl(database):
 
 
 def apply(config_override=None, tag_override=None, rollback=None, skip_missing=None):
-    """
-        Look thru migrations and apply them
-    """
+    """ Look thru migrations and apply them """
 
     # Load config
     config = get_config(config_override)
