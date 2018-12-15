@@ -122,16 +122,18 @@ class Test(unittest.TestCase):
     def test_parse_statements_3(self):
         queries = """
         SELECT 1;
+        -- Some comment
         SELECT 2;
         """
         parsed = schema_change.parse_statements(queries)
         assert len(parsed) == 2
-        assert parsed[0] == 'SELECT 1'
-        assert parsed[1] == 'SELECT 2'
+        assert parsed[0] == 'SELECT 1;'
+        assert parsed[1] == 'SELECT 2;'
 
     def test_parse_statements_4(self):
         queries = """
         SELECT 1;
+        -- Some comment
         DELIMITER $$
         SELECT 2$$
         DELIMITER ;
@@ -139,9 +141,9 @@ class Test(unittest.TestCase):
         """
         parsed = schema_change.parse_statements(queries)
         assert len(parsed) == 3
-        assert parsed[0] == 'SELECT 1'
-        assert parsed[1] == 'SELECT 2'
-        assert parsed[2] == 'SELECT 3'
+        assert parsed[0] == 'SELECT 1;'
+        assert parsed[1] == 'SELECT 2;'
+        assert parsed[2] == 'SELECT 3;'
 
     def test_run_migration(self):
         config = schema_change.get_config(self.config_path)

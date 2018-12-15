@@ -176,7 +176,11 @@ def run_migration(connection, queries):
 
     # Execute query
     with connection.cursor() as cursorMig:
-        cursorMig.execute(queries)
+        # Parse statements
+        queries = parse_statements(queries)
+
+        for query in queries:
+            cursorMig.execute(queries)
         connection.commit()
 
     return True
