@@ -121,12 +121,15 @@ def get_pg_connection(host, user, port, password, database, ssl={}):
                             )
 
 
-def parse_statements(queries_input):
+def parse_statements(queries_input, engine):
     """ Parse input and return a list of SQL statements """
 
     queries = []
     query = ''
     sql_delimiter = ';'
+
+    # Possible delimiters used in PostgreSQL functions
+    postgres_func_delimiters = ['$$', '##']
 
     # Split input by lines
     lines = queries_input.strip().split('\n')
@@ -140,17 +143,24 @@ def parse_statements(queries_input):
             continue
 
         # Detect new SQL delimiter
-        if line.upper().startswith('DELIMITER '):
+        if engine == 'mysql' and line.upper().startswith('DELIMITER '):
             sql_delimiter = line.split()[1]
+            continue
+        elif engine == 'postgresql' and [delimiter for delimiter in postgres_func_delimiters if 'AS ' + delimiter in line.upper()]:
+            sql_delimiter = line.split()[-1]
+
+            # Ensure that we leave 'AS [DELIMITER]'
+            query += line + '\n'
+
             continue
 
         # Statement is not finished
         if sql_delimiter not in line and k != len(lines) - 1:
             # Append line
-            query += line + ' '
+            query += line + '\n'
         else:  # Statement is finished
             # Replace non default delimiter
-            if sql_delimiter != ';' and line.endswith(sql_delimiter):
+            if sql_delimiter != ';' and engine == 'mysql' and line.endswith(sql_delimiter):
                 line = line.replace(sql_delimiter, ';')
 
             queries.append(query + line)
@@ -159,13 +169,13 @@ def parse_statements(queries_input):
     return queries
 
 
-def run_migration(connection, queries):
+def run_migration(connection, queries, engine):
     """ Apply a migration to the SQL server """
 
     # Execute query
     with connection.cursor() as cursorMig:
         # Parse statements
-        queries = parse_statements(queries)
+        queries = parse_statements(queries, engine)
 
         for query in queries:
             cursorMig.execute(query)
@@ -253,7 +263,7 @@ def apply_migrations(engine, connection, path):
         # print (source);
 
         # Run migration
-        run_migration(connection, source)
+        run_migration(connection, source, engine)
 
         # Save migration
         save_migration(connection, basename)
@@ -292,7 +302,7 @@ def rollback_migration(engine, connection, path, migration_to_rollback):
     # print (source);
 
     # Run migration rollback
-    run_migration(connection, source)
+    run_migration(connection, source, engine)
 
     # Delete migration
     delete_migration(connection, basename)
@@ -367,7 +377,7 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
 
         # Run pre migration queries
         if pre_migration:
-            run_migration(connection, pre_migration)
+            run_migration(connection, pre_migration, engine)
 
         if rollback:
             print(' * Rolling back %s (`%s` on %s)' % (tag, db, engine))
@@ -381,7 +391,7 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
 
         # Run post migration queries
         if post_migration:
-            run_migration(connection, post_migration)
+            run_migration(connection, post_migration, engine)
 
     return True
 

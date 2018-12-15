@@ -108,29 +108,40 @@ class Test(unittest.TestCase):
             connection, psycopg2.extensions.connection)
 
     def test_parse_statements(self):
+        """ Test single query """
+
         queries = """SELECT 1;"""
-        parsed = schema_change.parse_statements(queries)
+        parsed = schema_change.parse_statements(queries, engine='mysql')
+
         assert len(parsed) == 1
         assert parsed[0] == 'SELECT 1;'
 
     def test_parse_statements_2(self):
+        """ Test single query without delimiter """
+
         queries = """SELECT 1"""
-        parsed = schema_change.parse_statements(queries)
+        parsed = schema_change.parse_statements(queries, engine='mysql')
+
         assert len(parsed) == 1
         assert parsed[0] == 'SELECT 1'
 
     def test_parse_statements_3(self):
+        """ Test multiple queries and comment removal """
+
         queries = """
         SELECT 1;
         -- Some comment
         SELECT 2;
         """
-        parsed = schema_change.parse_statements(queries)
+        parsed = schema_change.parse_statements(queries, engine='mysql')
+
         assert len(parsed) == 2
         assert parsed[0] == 'SELECT 1;'
         assert parsed[1] == 'SELECT 2;'
 
     def test_parse_statements_4(self):
+        """ Test delimiter change  """
+
         queries = """
         SELECT 1;
         -- Some comment
@@ -139,11 +150,79 @@ class Test(unittest.TestCase):
         DELIMITER ;
         SELECT 3;
         """
-        parsed = schema_change.parse_statements(queries)
+        parsed = schema_change.parse_statements(queries, engine='mysql')
+
         assert len(parsed) == 3
         assert parsed[0] == 'SELECT 1;'
         assert parsed[1] == 'SELECT 2;'
         assert parsed[2] == 'SELECT 3;'
+
+    def test_parse_statements_5(self):
+        """ Test for MySQL stored function """
+
+        queries = """
+        SELECT 1;
+
+        DELIMITER $$
+
+        CREATE FUNCTION CustomerLevel(p_creditLimit double) RETURNS VARCHAR(10)
+        BEGIN
+            RETURN 1;
+        END$$
+
+        DELIMITER ;
+
+        SELECT 2;
+        """
+        parsed = schema_change.parse_statements(queries, engine='mysql')
+
+        assert len(parsed) == 3
+        assert parsed[0] == 'SELECT 1;'
+        assert parsed[1] == """CREATE FUNCTION CustomerLevel(p_creditLimit double) RETURNS VARCHAR(10)
+BEGIN
+RETURN 1;
+END;"""
+        assert parsed[2] == 'SELECT 2;'
+
+    def test_parse_statements_6(self):
+        """ Test for PostgreSQL stored function """
+
+        queries = """
+        SELECT 1;
+
+        CREATE OR REPLACE FUNCTION some function(a int, b bigint)
+        RETURNS BOOLEAN
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        AS $$
+        BEGIN
+            UPDATE table
+            SET something = b
+            WHERE id = a;
+            RETURN FOUND;
+        END;
+        $$;
+
+        SELECT 2;
+        """
+        parsed = schema_change.parse_statements(
+            queries, engine='postgresql')
+
+        assert len(parsed) == 3
+        assert parsed[0] == 'SELECT 1;'
+        assert parsed[1] == """CREATE OR REPLACE FUNCTION some function(a int, b bigint)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+UPDATE table
+SET something = b
+WHERE id = a;
+RETURN FOUND;
+END;
+$$;"""
+        assert parsed[2] == 'SELECT 2;'
 
     def test_run_migration(self):
         config = schema_change.get_config(self.config_path)
@@ -153,7 +232,8 @@ class Test(unittest.TestCase):
         connection = schema_change.get_pg_connection(
             database['host'], database['user'], database['port'], database['password'], database['db'], schema_change.get_ssl(database))
 
-        self.assertTrue(schema_change.run_migration(connection, 'SELECT 1'))
+        self.assertTrue(schema_change.run_migration(
+            connection, 'SELECT 1'), engine='postgresql')
 
     def test_save_migration(self):
         config = schema_change.get_config(self.config_path)
