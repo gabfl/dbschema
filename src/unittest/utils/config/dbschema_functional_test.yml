@@ -5,7 +5,7 @@ databases:
         port: 5432 # Database port
         user: postgres # Username
         password: '' # Optional password
-        db: my_db # Database name
+        db: my_db_functional_test # Database name
         # sslmode: require
         # sslcert: /path/to/client-cert.pem
         # sslkey: /path/to/client-key.pem
@@ -21,7 +21,7 @@ databases:
         port: 3306
         user: travis
         password: ''
-        db: my_db
+        db: my_db_functional_test
         # ssl_check_hostname: true # set to false to disable hostname checking of the server cert
         # ssl_cert: /path/to/client-cert.pem
         # ssl_key: /path/to/client-key.pem
