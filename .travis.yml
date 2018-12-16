@@ -1,6 +1,8 @@
 language: python
 python:
   - "3.6"
+addons:
+  postgresql: "9.6"
 services:
   - mysql
   - postgresql
@@ -10,14 +12,19 @@ before_install:
   - cp src/unittest/utils/config/dbschema.yml ~/.dbschema.yml
 before_script:
   - psql -c 'create database my_db;' -U postgres
+  - psql -c 'create database my_db_functional_test;' -U postgres
   - psql -c 'create database my_empty_db;' -U postgres
   - psql -f schema/postgresql.sql my_db -U postgres
+  - psql -f schema/postgresql.sql my_db_functional_test -U postgres
   - mysql -e 'CREATE DATABASE my_db;'
+  - mysql -e 'CREATE DATABASE my_db_functional_test;'
   - mysql -e 'CREATE DATABASE my_empty_db;'
   - mysql my_db < schema/mysql.sql
+  - mysql my_db_functional_test < schema/mysql.sql
 script:
   - pycodestyle --exclude=venv --ignore=E501 .
   - pytest
+  - dbschema --config src/unittest/utils/config/dbschema_functional_test.yml
   - coverage run --branch --source=. -m unittest discover -bv
   - coverage report -m
 after_success:
