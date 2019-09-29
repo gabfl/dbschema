@@ -22,10 +22,9 @@ before_script:
   - mysql my_db < schema/mysql.sql
   - mysql my_db_functional_test < schema/mysql.sql
 script:
-  - pycodestyle --exclude=venv --ignore=E501 .
-  - pytest
   - dbschema --config src/unittest/utils/config/dbschema_functional_test.yml
-  - coverage run --branch --source=. -m unittest discover -bv
+  - pycodestyle --exclude=venv --ignore=E501 .
+  - coverage run --source=. -m pytest
   - coverage report -m
 after_success:
   - codecov
