@@ -114,10 +114,10 @@ def get_pg_connection(host, user, port, password, database, ssl={}):
                             port=port,
                             password=password,
                             dbname=database,
-                            sslmode=ssl.get('sslmode', None),
-                            sslcert=ssl.get('sslcert', None),
-                            sslkey=ssl.get('sslkey', None),
-                            sslrootcert=ssl.get('sslrootcert', None),
+                            sslmode=ssl.get('sslmode'),
+                            sslcert=ssl.get('sslcert'),
+                            sslkey=ssl.get('sslkey'),
+                            sslrootcert=ssl.get('sslrootcert'),
                             )
 
 
@@ -327,7 +327,7 @@ def get_ssl(database):
     # Loop thru keys
     ssl = {}
     for key in keys:
-        value = database.get(key, None)
+        value = database.get(key)
         if value is not None:
             ssl[key] = value
 
@@ -356,11 +356,11 @@ def apply(config_override=None, tag_override=None, rollback=None, skip_missing=N
         host = databases[tag].get('host', 'localhost')
         port = databases[tag].get('port', 3306)
         user = databases[tag]['user']
-        password = databases[tag]['password']
+        password = databases[tag].get('password')
         db = databases[tag]['db']
         path = add_slash(databases[tag]['path'])
-        pre_migration = databases[tag].get('pre_migration', None)
-        post_migration = databases[tag].get('post_migration', None)
+        pre_migration = databases[tag].get('pre_migration')
+        post_migration = databases[tag].get('post_migration')
 
         # Check if the migration path exists
         if skip_missing:
