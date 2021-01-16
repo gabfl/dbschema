@@ -1,9 +1,9 @@
 # dbschema
 
 [![Pypi](https://img.shields.io/pypi/v/dbschema.svg)](https://pypi.org/project/dbschema)
-[![Build Status](https://travis-ci.org/gabfl/dbschema.svg?branch=master)](https://travis-ci.org/gabfl/dbschema)
-[![codecov](https://codecov.io/gh/gabfl/dbschema/branch/master/graph/badge.svg)](https://codecov.io/gh/gabfl/dbschema)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-green.svg)](https://raw.githubusercontent.com/gabfl/dbschema/master/LICENSE)
+[![Build Status](https://travis-ci.org/gabfl/dbschema.svg?branch=main)](https://travis-ci.org/gabfl/dbschema)
+[![codecov](https://codecov.io/gh/gabfl/dbschema/branch/main/graph/badge.svg)](https://codecov.io/gh/gabfl/dbschema)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-green.svg)](https://raw.githubusercontent.com/gabfl/dbschema/main/LICENSE)
 
 `dbschema` is a tool to run MySQL or PostgreSQL migrations automatically. Using a table, it keeps a state of previous migrations to avoid duplicates.
 
