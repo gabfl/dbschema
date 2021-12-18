@@ -42,8 +42,10 @@ jobs:
           sudo -u postgres createdb --owner=db_user my_empty_db
       - name: Import PostgreSQL schemas
         run: |
-          PGPASSWORD=db_password psql -f schema/postgresql.sql my_db -U db_user -p
-          PGPASSWORD=db_password psql -f schema/postgresql.sql my_db_functional_test -U db_user -p
+          psql -h localhost -f schema/postgresql.sql -d my_db -U db_user
+          psql -h localhost -f schema/postgresql.sql -d my_db_functional_test -U db_user
+        env:
+          PGPASSWORD: db_password
       - name: Install dependencies
         run: |
           pip install -U pip
